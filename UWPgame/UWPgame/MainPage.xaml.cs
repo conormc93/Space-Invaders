@@ -3,8 +3,11 @@ using Microsoft.Graphics.Canvas.UI.Xaml;
 using System;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using Windows.UI.Core;
 using Windows.UI.ViewManagement;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using UWPgame.Class;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -17,12 +20,12 @@ namespace UWPgame
     {
 
         CanvasBitmap StartScreen;
-        Rect bounds = ApplicationView.GetForCurrentView().VisibleBounds;
+        public static Rect bounds = ApplicationView.GetForCurrentView().VisibleBounds;
 
         //scaling class can access this info
         // have to make static
-        public static float DesignWidth = 720;
-        public static float DesignHeight = 1280;
+        public static float DesignWidth = 1280;
+        public static float DesignHeight = 720;
         public static float scaleWidth, scaleHeight;
 
 
@@ -30,6 +33,19 @@ namespace UWPgame
         public MainPage()
         {
             this.InitializeComponent();
+
+            //the window is going to bind us to this method
+            //when size of window changes fire the event
+            Window.Current.SizeChanged += Current_SizeChanged;
+
+            //need to set the scale when the page is being loaded
+            Scaling.setScale();
+        }
+
+        private void Current_SizeChanged(object sender, WindowSizeChangedEventArgs e)
+        {
+            bounds = ApplicationView.GetForCurrentView().VisibleBounds;
+            Scaling.setScale();
         }
 
         private void GameCanvas_CreateResources(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.CanvasCreateResourcesEventArgs args)
@@ -49,7 +65,7 @@ namespace UWPgame
 
         private void GameCanvas_Draw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
         {
-            args.DrawingSession.DrawImage(StartScreen);
+            args.DrawingSession.DrawImage(Scaling.Img(StartScreen));
 
             //redraw everything on the screen
             //redraws each frame i.e 60 FPS
