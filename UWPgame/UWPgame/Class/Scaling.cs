@@ -10,8 +10,8 @@ namespace UWPgame.Class
         public static void setScale()
         {
             //Set the bounds of the current view
-            MainPage.scaleWidth = (float)MainPage.bounds.Width / MainPage.DesignWidth;
-            MainPage.scaleHeight = (float)MainPage.bounds.Height / MainPage.DesignHeight;
+            MainPage.scaleWidth = (float)MainPage.bounds.Width / MainPage.designWidth;
+            MainPage.scaleHeight = (float)MainPage.bounds.Height / MainPage.designHeight;
 
         }
 

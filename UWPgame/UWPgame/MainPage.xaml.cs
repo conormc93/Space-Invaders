@@ -18,17 +18,16 @@ namespace UWPgame
     /// </summary>
     public sealed partial class MainPage : Page
     {
-
-        CanvasBitmap StartScreen;
+        public static CanvasBitmap BG, StartScreen, LevelOne;
         public static Rect bounds = ApplicationView.GetForCurrentView().VisibleBounds;
 
         //scaling class can access this info
         // have to make static
-        public static float DesignWidth = 1280;
-        public static float DesignHeight = 720;
+        public static float designWidth = 1280;
+        public static float designHeight = 720;
         public static float scaleWidth, scaleHeight;
 
-
+        public static int gameState = 0; // Startscreen
 
         public MainPage()
         {
@@ -59,13 +58,19 @@ namespace UWPgame
         async Task CreateResourcesAsync(CanvasControl sender)
         {
             //load startscreen image
-            //
             StartScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/startscreen.png"));
+            LevelOne = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/level-one.png"));
         }
 
         private void GameCanvas_Draw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
         {
-            args.DrawingSession.DrawImage(Scaling.Img(StartScreen));
+            //at the first frame
+            //call gsm so game state is at 0
+            //load the start screen
+            GSM.gameStateManager();
+
+            //dynamically changing the image/state
+            args.DrawingSession.DrawImage(Scaling.Img(BG));
 
             //redraw everything on the screen
             //redraws each frame i.e 60 FPS
@@ -74,7 +79,12 @@ namespace UWPgame
 
         private void GameCanvas_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-
+            //if the canvas is tapped
+            //change the game state
+            if(gameState == 0)
+            {
+                gameState += 1;
+            }
         }
     }
 }
