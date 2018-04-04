@@ -110,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\images\level-one.png" />
+    <Content Include="Assets\images\scorescreen.png" />
     <Content Include="Assets\images\startscreen.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />

@@ -15,15 +15,24 @@ namespace UWPgame.Class
         //third: show hight score
         public static void gameStateManager()
         {
-            if (MainPage.gameState == 0)
+            if (MainPage.roundEnded == true)
             {
-                //the background to our game will be the startscreen
-                MainPage.BG = MainPage.StartScreen;
+                //when the round ends, display the score
+                MainPage.BG = MainPage.ScoreScreen;
             }
-            else if(MainPage.gameState == 1)
+            else
             {
-                MainPage.BG = MainPage.LevelOne;
+                if (MainPage.gameState == 0)
+                {
+                    //the background to our game will be the startscreen
+                    MainPage.BG = MainPage.StartScreen;
+                }
+                else if (MainPage.gameState == 1)
+                {
+                    MainPage.BG = MainPage.LevelOne;
+                }
             }
+ 
         }
 
     }

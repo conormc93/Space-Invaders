@@ -18,7 +18,8 @@ namespace UWPgame
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        public static CanvasBitmap BG, StartScreen, LevelOne;
+
+        public static CanvasBitmap BG, StartScreen, LevelOne, ScoreScreen;
         public static Rect bounds = ApplicationView.GetForCurrentView().VisibleBounds;
 
         //scaling class can access this info
@@ -27,8 +28,14 @@ namespace UWPgame
         public static float designHeight = 720;
         public static float scaleWidth, scaleHeight;
 
+        public static int countdown = 3; //testing 3 seconds
+        public static bool roundEnded = false; // when game starts we dont want to trigger this
+
         public static int gameState = 0; // Startscreen
 
+        public static DispatcherTimer roundTimer = new DispatcherTimer();
+
+        //constructor
         public MainPage()
         {
             this.InitializeComponent();
@@ -39,6 +46,20 @@ namespace UWPgame
 
             //need to set the scale when the page is being loaded
             Scaling.setScale();
+
+            roundTimer.Tick += RoundTimer_Tick;
+            roundTimer.Interval = new TimeSpan(0,0,1);
+        }
+
+        private void RoundTimer_Tick(object sender, object e)
+        {
+            countdown -= 1;
+
+            if (countdown < 1)
+            {
+                roundTimer.Stop();
+                roundEnded = true;
+            }
         }
 
         private void Current_SizeChanged(object sender, WindowSizeChangedEventArgs e)
@@ -60,6 +81,8 @@ namespace UWPgame
             //load startscreen image
             StartScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/startscreen.png"));
             LevelOne = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/level-one.png"));
+            ScoreScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/scorescreen.png"));
+
         }
 
         private void GameCanvas_Draw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
@@ -79,12 +102,22 @@ namespace UWPgame
 
         private void GameCanvas_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            //if the canvas is tapped
-            //change the game state
-            if(gameState == 0)
+            if (roundEnded == true)
             {
-                gameState += 1;
+                //show different background
+                gameState = 0; //testing
             }
-        }
+            else
+            {
+                //if the canvas is tapped
+                //change the game state
+                if (gameState == 0)
+                {
+                    gameState += 1;
+                    roundTimer.Start();
+                }
+
+            }//end else
+        }//GameCanvas_Tapped
     }
 }
