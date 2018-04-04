@@ -23,26 +23,25 @@ namespace UWPgame
 
         public static CanvasBitmap BG, StartScreen, LevelOne, ScoreScreen, Blast;
         public static Rect bounds = ApplicationView.GetForCurrentView().VisibleBounds;
+        public static DispatcherTimer roundTimer = new DispatcherTimer();
 
         //scaling class can access this info
         // have to make static
         public static float designWidth = 1280;
         public static float designHeight = 720;
-        public static float scaleWidth, scaleHeight;
+        public static float scaleWidth, scaleHeight, pointX, pointY, blastX, blastY;
 
-        public static int countdown = 3; //testing 3 seconds
-        public static bool roundEnded = false; // when game starts we dont want to trigger this
+        
 
+        public static int countdown = 6;
         public static int gameState = 0; // Startscreen
 
-        public static DispatcherTimer roundTimer = new DispatcherTimer();
+        public static bool roundEnded = false; // when game starts we dont want to trigger this
 
         //Lists (Projectile)
         public static List<float> blastXPOS = new List<float>();
         public static List<float> blastYPOS = new List<float>();
-
-
-
+        public static List<float> percent = new List<float>();
 
         //constructor
         public MainPage()
@@ -56,7 +55,10 @@ namespace UWPgame
             //need to set the scale when the page is being loaded
             Scaling.setScale();
 
-            roundTimer.Tick += RoundTimer_Tick;
+            blastX = (float)bounds.Width / 2;
+            blastY = (float)bounds.Height;
+
+        roundTimer.Tick += RoundTimer_Tick;
             roundTimer.Interval = new TimeSpan(0,0,1);
         }
 
@@ -75,6 +77,9 @@ namespace UWPgame
         {
             bounds = ApplicationView.GetForCurrentView().VisibleBounds;
             Scaling.setScale();
+
+            blastX = (float)bounds.Width / 2;
+            blastY = (float)bounds.Height;
         }
 
         private void GameCanvas_CreateResources(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.CanvasCreateResourcesEventArgs args)
@@ -87,7 +92,7 @@ namespace UWPgame
         //keeps thread pool alive so process can happen in background
         async Task CreateResourcesAsync(CanvasControl sender)
         {
-            //load startscreen image
+            //images
             StartScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/startscreen.png"));
             LevelOne = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/level-one.png"));
             ScoreScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/scorescreen.png"));
@@ -113,7 +118,23 @@ namespace UWPgame
             //Game displays those blasts on the screen
             for (int i = 0; i < blastXPOS.Count; i++)
             {
-                args.DrawingSession.DrawImage(Scaling.Img(Blast), blastXPOS[i], blastYPOS[i]);
+                //calculate the position of the blast
+                //in betweeen the start position and the clicked position
+                //use linear interpolation formula
+                pointX = (blastX + (blastXPOS[i] - blastX) * percent[i]);
+                pointY = (blastY + (blastYPOS[i] - blastY) * percent[i]);
+
+                args.DrawingSession.DrawImage(Scaling.Img(Blast), pointX - (15 * scaleWidth), pointY - ((float)17.5 * scaleHeight));
+
+                percent[i] += (0.050f * scaleHeight);
+
+                //remove blasts that go off top of the screen
+                if (pointY < 0f)
+                {
+                    blastXPOS.RemoveAt(i);
+                    blastYPOS.RemoveAt(i);
+                    percent.RemoveAt(i);
+                }
             }
 
             //redraw everything on the screen
@@ -128,6 +149,7 @@ namespace UWPgame
                 //show different background
                 gameState = 0; //testing
                 roundEnded = false;
+                countdown = 6;
             }
             else
             {
@@ -137,11 +159,17 @@ namespace UWPgame
                 {
                     gameState += 1;
                     roundTimer.Start();
+                }
+                else if (gameState > 0)
+                {
 
                     //we need to add an item to each of our list
                     //depending on where we tap on the game canvas
                     blastXPOS.Add((float)e.GetPosition(GameCanvas).X);
                     blastYPOS.Add((float)e.GetPosition(GameCanvas).Y);
+
+                    percent.Add(0f);
+
                 }
 
             }//end else
