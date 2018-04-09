@@ -21,17 +21,18 @@ namespace UWPgame
     public sealed partial class MainPage : Page
     {
 
-        public static CanvasBitmap BG, StartScreen, LevelOne, ScoreScreen, Blast;
+        public static CanvasBitmap BG, StartScreen, LevelOne, ScoreScreen, Blast,  EnemyOne, EnemyTwo, SHIP_IMG;
         public static Rect bounds = ApplicationView.GetForCurrentView().VisibleBounds;
+
+        // Timers
         public static DispatcherTimer roundTimer = new DispatcherTimer();
+        public static DispatcherTimer enemyTimer = new DispatcherTimer();
 
         //scaling class can access this info
-        // have to make static
+        //have to make static
         public static float designWidth = 1280;
         public static float designHeight = 720;
         public static float scaleWidth, scaleHeight, pointX, pointY, blastX, blastY;
-
-        
 
         public static int countdown = 6;
         public static int gameState = 0; // Startscreen
@@ -42,6 +43,15 @@ namespace UWPgame
         public static List<float> blastXPOS = new List<float>();
         public static List<float> blastYPOS = new List<float>();
         public static List<float> percent = new List<float>();
+
+        //Lists (Enemies)
+        public static List<float> enemyXPOS = new List<float>();
+        public static List<float> enemyYPOS = new List<float>();
+        public static List<int> enemyShip = new List<int>();
+
+        //Random Generators
+        public Random enemyShipType = new Random();
+        public Random enemyGenerationInterval = new Random();
 
         //constructor
         public MainPage()
@@ -58,8 +68,24 @@ namespace UWPgame
             blastX = (float)bounds.Width / 2;
             blastY = (float)bounds.Height;
 
-        roundTimer.Tick += RoundTimer_Tick;
+            roundTimer.Tick += RoundTimer_Tick;
             roundTimer.Interval = new TimeSpan(0,0,1);
+
+            enemyTimer.Tick += EnemyTimer_Tick;
+            //reference the random generator
+            enemyTimer.Interval = new TimeSpan(0, 0, 0, 0, enemyGenerationInterval.Next(300, 3000));
+        }
+
+        private void EnemyTimer_Tick(object sender, object e)
+        {
+            int shipType = enemyShipType.Next(1,2);
+
+            enemyXPOS.Add(50 * scaleWidth);
+            enemyYPOS.Add(119 * scaleHeight);
+            enemyShip.Add(shipType);
+
+            enemyTimer.Interval = new TimeSpan(0, 0, 0, 0, enemyGenerationInterval.Next(300, 3000));
+
         }
 
         private void RoundTimer_Tick(object sender, object e)
@@ -97,6 +123,8 @@ namespace UWPgame
             LevelOne = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/level-one.png"));
             ScoreScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/scorescreen.png"));
             Blast = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/blast.png"));
+            EnemyOne = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/enemy-one.png"));
+            EnemyTwo = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/enemy-two.png"));
 
         }
 
@@ -111,6 +139,13 @@ namespace UWPgame
             args.DrawingSession.DrawImage(Scaling.Img(BG));
             args.DrawingSession.DrawText(countdown.ToString(), 100, 100, Colors.White);
 
+            for(int j = 0; j < enemyXPOS.Count; j++)
+            {
+                if (enemyShip[j] == 1) { SHIP_IMG = EnemyOne; }
+                if (enemyShip[j] == 2) { SHIP_IMG = EnemyTwo; }
+                enemyXPOS[j] += 3;
+                args.DrawingSession.DrawImage(Scaling.Img(SHIP_IMG), enemyXPOS[j], enemyYPOS[j]);
+            }
 
             //Display Blasts
             //Every time we tap on the screen we add 
@@ -150,6 +185,12 @@ namespace UWPgame
                 gameState = 0; //testing
                 roundEnded = false;
                 countdown = 6;
+
+                //Stop the enemy timer
+                enemyTimer.Stop();
+                enemyXPOS.Clear();
+                enemyYPOS.Clear();
+                enemyShip.Clear();
             }
             else
             {
@@ -159,6 +200,7 @@ namespace UWPgame
                 {
                     gameState += 1;
                     roundTimer.Start();
+                    enemyTimer.Start();
                 }
                 else if (gameState > 0)
                 {
