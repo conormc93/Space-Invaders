@@ -57,13 +57,6 @@ namespace UWPgame
         public Random enemyGenerationInterval = new Random();
         public Random enemyXStart = new Random(); // starting position for ships
 
-        //Font
-        public static CanvasTextFormat textFormat1 = new CanvasTextFormat()
-        {
-            FontSize = 60,
-            WordWrapping = CanvasWordWrapping.NoWrap //no wrapping because bounds dont calculate properly
-        };
-
         //constructor
         public MainPage()
         {
@@ -166,7 +159,9 @@ namespace UWPgame
             if (roundEnded == true)
             {
 
-                CanvasTextLayout textLayout1 = new CanvasTextLayout(args.DrawingSession, myScore.ToString(), textFormat1, 0.0f, 0.0f);
+                //FontSize = (40 * scaleHeight), WordWrapping = CanvasWordWrapping.NoWrap
+
+                CanvasTextLayout textLayout1 = new CanvasTextLayout(args.DrawingSession, myScore.ToString(), new CanvasTextFormat() { FontFamily= "ms-appx:///Assets/Fonts/pricedown bl.ttf", FontSize = (40 * scaleHeight), WordWrapping = CanvasWordWrapping.NoWrap }, 0.0f, 0.0f);
                 args.DrawingSession.DrawTextLayout(textLayout1, ((designWidth * scaleWidth) / 2) - ((float)textLayout1.DrawBounds.Width / 2), 320 * scaleHeight, Colors.White);
 
             }
@@ -207,13 +202,13 @@ namespace UWPgame
                         // possibly change this to difficulty
                         if (enemyDirection[j] == "left")
                         {
-                            enemyXPOS[j] -= 2;
+                            enemyXPOS[j] -= 4;
                         }
                         else
                         {
-                            enemyXPOS[j] += 2;
+                            enemyXPOS[j] += 4;
                         }
-                        enemyYPOS[j] += 2;
+                        enemyYPOS[j] += 4;
                         args.DrawingSession.DrawImage(Scaling.Img(SHIP_IMG), enemyXPOS[j], enemyYPOS[j]);
                     }
 
@@ -287,7 +282,7 @@ namespace UWPgame
                 //show different background
                 gameState = 0; //testing
                 roundEnded = false;
-                countdown = 6;
+                countdown = 10;
 
                 //Stop the enemy timer
                 enemyXPOS.Clear();
