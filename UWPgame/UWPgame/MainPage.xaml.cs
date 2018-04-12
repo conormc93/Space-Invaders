@@ -159,7 +159,6 @@ namespace UWPgame
             if(gameState > 0 && roundEnded == false)
             {
 
-                args.DrawingSession.DrawImage(Scaling.Img(MyShip), (float)bounds.Width / 2 - 119 * scaleWidth , (float)bounds.Height - 140 * scaleHeight);
                 args.DrawingSession.DrawText("Score: " + myScore.ToString(), (float)bounds.Width/2, 10, Color.FromArgb(255,255,255, 255));
 
                 // if we have a point on our x & y axis
@@ -254,6 +253,8 @@ namespace UWPgame
                         percent.RemoveAt(i);
                     }
                 }//end second for
+
+                args.DrawingSession.DrawImage(Scaling.Img(MyShip), (float)bounds.Width / 2 - (60 * scaleWidth), (float)bounds.Height - (137 * scaleHeight));
             }//end if
 
             //redraw everything on the screen
