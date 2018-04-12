@@ -48,10 +48,12 @@ namespace UWPgame
         public static List<float> enemyXPOS = new List<float>();
         public static List<float> enemyYPOS = new List<float>();
         public static List<int> enemyShip = new List<int>();
+        public static List<String> enemyDirection = new List<String>();
 
         //Random Generators
         public Random enemyShipType = new Random();
         public Random enemyGenerationInterval = new Random();
+        public Random enemyXStart = new Random(); // starting position for ships
 
         //constructor
         public MainPage()
@@ -79,12 +81,22 @@ namespace UWPgame
         private void EnemyTimer_Tick(object sender, object e)
         {
             int shipType = enemyShipType.Next(1,3);
+            int startingPosition = enemyXStart.Next(0, (int)bounds.Width); // starting position x axis
 
-            enemyXPOS.Add(50 * scaleWidth);
-            enemyYPOS.Add(119 * scaleHeight);
+            if(startingPosition > bounds.Width/2)
+            {
+                enemyDirection.Add("left");
+            }
+            else
+            {
+                enemyDirection.Add("right");
+            }
+
+            enemyXPOS.Add(startingPosition);
+            enemyYPOS.Add(-50 * scaleHeight);
             enemyShip.Add(shipType);
 
-            enemyTimer.Interval = new TimeSpan(0, 0, 0, 0, enemyGenerationInterval.Next(300, 3000));
+            enemyTimer.Interval = new TimeSpan(0, 0, 0, 0, enemyGenerationInterval.Next(500, 2000));
 
         }
 
@@ -140,15 +152,26 @@ namespace UWPgame
             args.DrawingSession.DrawImage(Scaling.Img(BG));
             args.DrawingSession.DrawText(countdown.ToString(), 100, 100, Colors.White);
 
-            if(gameState > 0)
+            if(gameState > 0 && roundEnded == false)
             {
 
-                args.DrawingSession.DrawImage(Scaling.Img(MyShip), (float)bounds.Width / 2 - (119 * scaleWidth) , (float)bounds.Height - (140 * scaleHeight));
+                args.DrawingSession.DrawImage(Scaling.Img(MyShip), (float)bounds.Width / 2 - 119 * scaleWidth , (float)bounds.Height - 140 * scaleHeight);
+
+                //Enemies
                 for (int j = 0; j < enemyXPOS.Count; j++)
                 {
                     if (enemyShip[j] == 1) { SHIP_IMG = EnemyOne; }
                     if (enemyShip[j] == 2) { SHIP_IMG = EnemyTwo; }
-                    enemyXPOS[j] += 3;
+
+                    if (enemyDirection[j] == "left")
+                    {
+                        enemyXPOS[j] -= 3;
+                    }
+                    else
+                    {
+                        enemyXPOS[j] += 3;
+                    }
+                    enemyYPOS[j] += 3;
                     args.DrawingSession.DrawImage(Scaling.Img(SHIP_IMG), enemyXPOS[j], enemyYPOS[j]);
                 }
 
@@ -193,10 +216,11 @@ namespace UWPgame
                 countdown = 6;
 
                 //Stop the enemy timer
-                enemyTimer.Stop();
                 enemyXPOS.Clear();
                 enemyYPOS.Clear();
                 enemyShip.Clear();
+                enemyDirection.Clear();
+                enemyTimer.Stop();
             }
             else
             {
