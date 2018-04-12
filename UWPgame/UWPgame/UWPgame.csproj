@@ -97,6 +97,7 @@
     </Compile>
     <Compile Include="Class\GSM.cs" />
     <Compile Include="Class\Scaling.cs" />
+    <Compile Include="Class\Storage.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

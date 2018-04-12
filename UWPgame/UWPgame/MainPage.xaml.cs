@@ -11,6 +11,8 @@ using UWPgame.Class;
 using Windows.UI;
 using System.Collections.Generic;
 using Microsoft.Graphics.Canvas.Text;
+using Windows.Storage;
+using System.Numerics;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -35,6 +37,10 @@ namespace UWPgame
         public static float designHeight = 720;
         public static float scaleWidth, scaleHeight, pointX, pointY, blastX, blastY, myScore, boomX, boomY;
 
+        //High Score
+        public static string STRhighScore;
+        public static int highScore;
+
         public static int boomCount = 60; //testing frame animation
         public static int countdown = 10;
         public static int gameState = 0; // Startscreen
@@ -57,6 +63,8 @@ namespace UWPgame
         public Random enemyGenerationInterval = new Random();
         public Random enemyXStart = new Random(); // starting position for ships
 
+
+
         //constructor
         public MainPage()
         {
@@ -78,6 +86,9 @@ namespace UWPgame
             enemyTimer.Tick += EnemyTimer_Tick;
             //reference the random generator
             enemyTimer.Interval = new TimeSpan(0, 0, 0, 0, enemyGenerationInterval.Next(300, 3000));
+
+            Storage.CreateFile();
+            Storage.ReadFile();
         }
 
         private void EnemyTimer_Tick(object sender, object e)
@@ -158,11 +169,16 @@ namespace UWPgame
 
             if (roundEnded == true)
             {
-
-                //FontSize = (40 * scaleHeight), WordWrapping = CanvasWordWrapping.NoWrap
+                bool result = Int32.TryParse(STRhighScore, out highScore);
+                if (myScore > highScore)
+                {
+                    Storage.UpdateScore();
+                }
 
                 CanvasTextLayout textLayout1 = new CanvasTextLayout(args.DrawingSession, myScore.ToString(), new CanvasTextFormat() { FontFamily= "ms-appx:///Assets/Fonts/pricedown bl.ttf", FontSize = (40 * scaleHeight), WordWrapping = CanvasWordWrapping.NoWrap }, 0.0f, 0.0f);
                 args.DrawingSession.DrawTextLayout(textLayout1, ((designWidth * scaleWidth) / 2) - ((float)textLayout1.DrawBounds.Width / 2), 320 * scaleHeight, Colors.White);
+
+                args.DrawingSession.DrawText("High Score: " + highScore, new Vector2(200,200), Color.FromArgb(255,200,150,210));
 
             }
             else
@@ -170,6 +186,7 @@ namespace UWPgame
                 // Level 1
                 if (gameState > 0)
                 {
+                    
 
                     args.DrawingSession.DrawText("Score: " + myScore.ToString(), (float)bounds.Width / 2, 10, Color.FromArgb(255, 255, 255, 255));
 
