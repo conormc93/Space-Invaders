@@ -110,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\images\blast.png" />
+    <Content Include="Assets\images\boom.png" />
     <Content Include="Assets\images\enemy-one.png" />
     <Content Include="Assets\images\enemy-two.png" />
     <Content Include="Assets\images\level-one.png" />
