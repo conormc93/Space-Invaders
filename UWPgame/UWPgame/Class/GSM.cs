@@ -15,10 +15,12 @@ namespace UWPgame.Class
         //third: show hight score
         public static void gameStateManager()
         {
+            
             if (MainPage.roundEnded == true)
             {
                 //when the round ends, display the score
                 MainPage.BG = MainPage.ScoreScreen;
+                
             }
             else
             {
@@ -30,9 +32,10 @@ namespace UWPgame.Class
                 else if (MainPage.gameState == 1)
                 {
                     MainPage.BG = MainPage.LevelOne;
+                    
                 }
+                
             }
- 
         }
 
     }
