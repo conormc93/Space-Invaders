@@ -21,7 +21,7 @@ namespace UWPgame
     public sealed partial class MainPage : Page
     {
 
-        public static CanvasBitmap BG, StartScreen, LevelOne, ScoreScreen, Blast,  EnemyOne, EnemyTwo, SHIP_IMG;
+        public static CanvasBitmap BG, StartScreen, LevelOne, ScoreScreen, Blast,  EnemyOne, EnemyTwo, SHIP_IMG, MyShip;
         public static Rect bounds = ApplicationView.GetForCurrentView().VisibleBounds;
 
         // Timers
@@ -78,7 +78,7 @@ namespace UWPgame
 
         private void EnemyTimer_Tick(object sender, object e)
         {
-            int shipType = enemyShipType.Next(1,2);
+            int shipType = enemyShipType.Next(1,3);
 
             enemyXPOS.Add(50 * scaleWidth);
             enemyYPOS.Add(119 * scaleHeight);
@@ -125,6 +125,7 @@ namespace UWPgame
             Blast = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/blast.png"));
             EnemyOne = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/enemy-one.png"));
             EnemyTwo = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/enemy-two.png"));
+            MyShip = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/images/MyShip.png"));
 
         }
 
@@ -139,38 +140,43 @@ namespace UWPgame
             args.DrawingSession.DrawImage(Scaling.Img(BG));
             args.DrawingSession.DrawText(countdown.ToString(), 100, 100, Colors.White);
 
-            for(int j = 0; j < enemyXPOS.Count; j++)
+            if(gameState > 0)
             {
-                if (enemyShip[j] == 1) { SHIP_IMG = EnemyOne; }
-                if (enemyShip[j] == 2) { SHIP_IMG = EnemyTwo; }
-                enemyXPOS[j] += 3;
-                args.DrawingSession.DrawImage(Scaling.Img(SHIP_IMG), enemyXPOS[j], enemyYPOS[j]);
-            }
 
-            //Display Blasts
-            //Every time we tap on the screen we add 
-            //New blast into the list
-            //Game displays those blasts on the screen
-            for (int i = 0; i < blastXPOS.Count; i++)
-            {
-                //calculate the position of the blast
-                //in betweeen the start position and the clicked position
-                //use linear interpolation formula
-                pointX = (blastX + (blastXPOS[i] - blastX) * percent[i]);
-                pointY = (blastY + (blastYPOS[i] - blastY) * percent[i]);
-
-                args.DrawingSession.DrawImage(Scaling.Img(Blast), pointX - (15 * scaleWidth), pointY - ((float)17.5 * scaleHeight));
-
-                percent[i] += (0.050f * scaleHeight);
-
-                //remove blasts that go off top of the screen
-                if (pointY < 0f)
+                args.DrawingSession.DrawImage(Scaling.Img(MyShip), (float)bounds.Width / 2 - (119 * scaleWidth) , (float)bounds.Height - (140 * scaleHeight));
+                for (int j = 0; j < enemyXPOS.Count; j++)
                 {
-                    blastXPOS.RemoveAt(i);
-                    blastYPOS.RemoveAt(i);
-                    percent.RemoveAt(i);
+                    if (enemyShip[j] == 1) { SHIP_IMG = EnemyOne; }
+                    if (enemyShip[j] == 2) { SHIP_IMG = EnemyTwo; }
+                    enemyXPOS[j] += 3;
+                    args.DrawingSession.DrawImage(Scaling.Img(SHIP_IMG), enemyXPOS[j], enemyYPOS[j]);
                 }
-            }
+
+                //Display Blasts
+                //Every time we tap on the screen we add 
+                //New blast into the list
+                //Game displays those blasts on the screen
+                for (int i = 0; i < blastXPOS.Count; i++)
+                {
+                    //calculate the position of the blast
+                    //in betweeen the start position and the clicked position
+                    //use linear interpolation formula
+                    pointX = (blastX + (blastXPOS[i] - blastX) * percent[i]);
+                    pointY = (blastY + (blastYPOS[i] - blastY) * percent[i]);
+
+                    args.DrawingSession.DrawImage(Scaling.Img(Blast), pointX - (15 * scaleWidth), pointY - ((float)17.5 * scaleHeight));
+
+                    percent[i] += (0.050f * scaleHeight);
+
+                    //remove blasts that go off top of the screen
+                    if (pointY < 0f)
+                    {
+                        blastXPOS.RemoveAt(i);
+                        blastYPOS.RemoveAt(i);
+                        percent.RemoveAt(i);
+                    }
+                }//end second for
+            }//end if
 
             //redraw everything on the screen
             //redraws each frame i.e 60 FPS
