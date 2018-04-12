@@ -10,6 +10,7 @@ using Windows.UI.Xaml.Controls;
 using UWPgame.Class;
 using Windows.UI;
 using System.Collections.Generic;
+using Microsoft.Graphics.Canvas.Text;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -55,6 +56,13 @@ namespace UWPgame
         public Random enemyShipType = new Random();
         public Random enemyGenerationInterval = new Random();
         public Random enemyXStart = new Random(); // starting position for ships
+
+        //Font
+        public static CanvasTextFormat textFormat1 = new CanvasTextFormat()
+        {
+            FontSize = 60,
+            WordWrapping = CanvasWordWrapping.NoWrap //no wrapping because bounds dont calculate properly
+        };
 
         //constructor
         public MainPage()
@@ -155,107 +163,117 @@ namespace UWPgame
             args.DrawingSession.DrawImage(Scaling.Img(BG));
             args.DrawingSession.DrawText(countdown.ToString(), 100, 100, Colors.White);
 
-            // Level 1
-            if(gameState > 0 && roundEnded == false)
+            if (roundEnded == true)
             {
 
-                args.DrawingSession.DrawText("Score: " + myScore.ToString(), (float)bounds.Width/2, 10, Color.FromArgb(255,255,255, 255));
+                CanvasTextLayout textLayout1 = new CanvasTextLayout(args.DrawingSession, myScore.ToString(), textFormat1, 0.0f, 0.0f);
+                args.DrawingSession.DrawTextLayout(textLayout1, ((designWidth * scaleWidth) / 2) - ((float)textLayout1.DrawBounds.Width / 2), 320 * scaleHeight, Colors.White);
 
-                // if we have a point on our x & y axis
-                // that is greater than 0
-                // and our boomCount is greater than 0
-                // then we draw our boom image
-                if (boomX > 0 && boomY > 0 && boomCount > 0)
+            }
+            else
+            {
+                // Level 1
+                if (gameState > 0)
                 {
-                    // to draw the image we get the boom coordinates
-                    args.DrawingSession.DrawImage(Scaling.Img(Boom), boomX, boomY);
-                    boomCount -= 1;
-                }
-                else
-                {
-                    boomCount = 60;
-                    boomX = 0;
-                    boomY = 0;
-                }
 
+                    args.DrawingSession.DrawText("Score: " + myScore.ToString(), (float)bounds.Width / 2, 10, Color.FromArgb(255, 255, 255, 255));
 
-
-                //Enemies
-                for (int j = 0; j < enemyXPOS.Count; j++)
-                {
-                    if (enemyShip[j] == 1) { SHIP_IMG = EnemyOne; }
-                    if (enemyShip[j] == 2) { SHIP_IMG = EnemyTwo; }
-
-                    // instead of hard coding the speed in
-                    // possibly change this to difficulty
-                    if (enemyDirection[j] == "left")
+                    // if we have a point on our x & y axis
+                    // that is greater than 0
+                    // and our boomCount is greater than 0
+                    // then we draw our boom image
+                    if (boomX > 0 && boomY > 0 && boomCount > 0)
                     {
-                        enemyXPOS[j] -= 2;
+                        // to draw the image we get the boom coordinates
+                        args.DrawingSession.DrawImage(Scaling.Img(Boom), boomX, boomY);
+                        boomCount -= 1;
                     }
                     else
                     {
-                        enemyXPOS[j] += 2;
+                        boomCount = 60;
+                        boomX = 0;
+                        boomY = 0;
                     }
-                    enemyYPOS[j] += 2;
-                    args.DrawingSession.DrawImage(Scaling.Img(SHIP_IMG), enemyXPOS[j], enemyYPOS[j]);
-                }
 
-                // BLASTS //
-                //Every time we tap on the screen we add 
-                //New blast into the list
-                //Game displays those blasts on the screen
-                for (int i = 0; i < blastXPOS.Count; i++)
-                {
-                    //calculate the position of the blast
-                    //in betweeen the start position and the clicked position
-                    //use linear interpolation formula
-                    pointX = (blastX + (blastXPOS[i] - blastX) * percent[i]);
-                    pointY = (blastY + (blastYPOS[i] - blastY) * percent[i]);
 
-                    args.DrawingSession.DrawImage(Scaling.Img(Blast), pointX - (15 * scaleWidth), pointY - ((float)17.5 * scaleHeight));
 
-                    percent[i] += (0.050f * scaleHeight);
-
-                    //everytime we move our blasts
-                    //we want to check if that blast has 
-                    //hit anything
-                    for (int h = 0; h < enemyXPOS.Count; h++)
+                    //Enemies
+                    for (int j = 0; j < enemyXPOS.Count; j++)
                     {
-                        //check the position of the enemies through our points
+                        if (enemyShip[j] == 1) { SHIP_IMG = EnemyOne; }
+                        if (enemyShip[j] == 2) { SHIP_IMG = EnemyTwo; }
 
-                        if (pointX >= enemyXPOS[h] && pointX <= enemyXPOS[h] + ( 185 * scaleWidth) && pointY >= enemyYPOS[h] && pointY <= enemyYPOS[h] + (100 * scaleHeight))
+                        // instead of hard coding the speed in
+                        // possibly change this to difficulty
+                        if (enemyDirection[j] == "left")
                         {
-                            //set the coordinates of the boom
-                            boomX = pointX - (92 * scaleWidth);
-                            boomY = pointY - (50 * scaleHeight);
+                            enemyXPOS[j] -= 2;
+                        }
+                        else
+                        {
+                            enemyXPOS[j] += 2;
+                        }
+                        enemyYPOS[j] += 2;
+                        args.DrawingSession.DrawImage(Scaling.Img(SHIP_IMG), enemyXPOS[j], enemyYPOS[j]);
+                    }
 
-                            enemyXPOS.RemoveAt(h);
-                            enemyYPOS.RemoveAt(h);
-                            enemyShip.RemoveAt(h);
-                            enemyDirection.RemoveAt(h);
+                    // BLASTS //
+                    //Every time we tap on the screen we add 
+                    //New blast into the list
+                    //Game displays those blasts on the screen
+                    for (int i = 0; i < blastXPOS.Count; i++)
+                    {
+                        //calculate the position of the blast
+                        //in betweeen the start position and the clicked position
+                        //use linear interpolation formula
+                        pointX = (blastX + (blastXPOS[i] - blastX) * percent[i]);
+                        pointY = (blastY + (blastYPOS[i] - blastY) * percent[i]);
 
+                        args.DrawingSession.DrawImage(Scaling.Img(Blast), pointX - (15 * scaleWidth), pointY - ((float)17.5 * scaleHeight));
+
+                        percent[i] += (0.050f * scaleHeight);
+
+                        //everytime we move our blasts
+                        //we want to check if that blast has 
+                        //hit anything
+                        for (int h = 0; h < enemyXPOS.Count; h++)
+                        {
+                            //check the position of the enemies through our points
+
+                            if (pointX >= enemyXPOS[h] && pointX <= enemyXPOS[h] + (185 * scaleWidth) && pointY >= enemyYPOS[h] && pointY <= enemyYPOS[h] + (100 * scaleHeight))
+                            {
+                                //set the coordinates of the boom
+                                boomX = pointX - (92 * scaleWidth);
+                                boomY = pointY - (50 * scaleHeight);
+
+                                enemyXPOS.RemoveAt(h);
+                                enemyYPOS.RemoveAt(h);
+                                enemyShip.RemoveAt(h);
+                                enemyDirection.RemoveAt(h);
+
+                                blastXPOS.RemoveAt(i);
+                                blastYPOS.RemoveAt(i);
+                                percent.RemoveAt(i);
+
+                                myScore = myScore + 100;
+
+                                break;
+
+                            }//end if
+                        }//inner for
+
+                        //remove blasts that go off top of the screen
+                        if (pointY < 0f)
+                        {
                             blastXPOS.RemoveAt(i);
                             blastYPOS.RemoveAt(i);
                             percent.RemoveAt(i);
+                        }
+                    }//end second for
 
-                            myScore = myScore + 100;
-
-                            break;
-
-                        }//end if
-                    }//inner for
-
-                    //remove blasts that go off top of the screen
-                    if (pointY < 0f)
-                    {
-                        blastXPOS.RemoveAt(i);
-                        blastYPOS.RemoveAt(i);
-                        percent.RemoveAt(i);
-                    }
-                }//end second for
-
-                args.DrawingSession.DrawImage(Scaling.Img(MyShip), (float)bounds.Width / 2 - (60 * scaleWidth), (float)bounds.Height - (137 * scaleHeight));
-            }//end if
+                    args.DrawingSession.DrawImage(Scaling.Img(MyShip), (float)bounds.Width / 2 - (60 * scaleWidth), (float)bounds.Height - (137 * scaleHeight));
+                }//end if
+            }
 
             //redraw everything on the screen
             //redraws each frame i.e 60 FPS
